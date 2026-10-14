@@ -1,0 +1,856 @@
+<!doctype html>
+<html lang="nl"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Reisplanner</title>
+<meta name="robots" content="noindex">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Reisplanner">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#EEF1F5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E141B" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<script>window.RP_APP = true;</script>
+</head><body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+:root{
+  --bg:#EEF1F5; --surface:#FFFFFF; --surface-2:#F6F8FA; --line:#DCE1E8;
+  --ink:#13202E; --muted:#5A6676; --faint:#8A94A3;
+  --accent:#F4B400; --accent-ink:#1A1400; --accent-soft:#FFF3CC;
+  --action:#1F5BD6; --action-soft:#E6EEFC;
+  --ok:#17834B; --ok-soft:#DDF3E6; --warn:#B25E00; --warn-soft:#FFEBD2; --bad:#C2342B;
+  --c-stay:#5B4BD1; --c-travel:#1F78C8; --c-act:#17834B; --c-food:#C25A11; --c-other:#6A7584;
+  --shadow:0 1px 2px rgba(19,32,46,.06),0 4px 16px rgba(19,32,46,.06);
+  --font-d:"Bricolage Grotesque",ui-rounded,system-ui,-apple-system,sans-serif;
+  --font:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --r:14px; --tabh:64px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark;
+  --bg:#0E141B; --surface:#17202A; --surface-2:#1D2833; --line:#2A3643;
+  --ink:#E9EEF4; --muted:#A3AFBD; --faint:#76828F;
+  --accent:#FFC629; --accent-ink:#1A1400; --accent-soft:#3A3010;
+  --action:#7DA7FF; --action-soft:#1C2B47;
+  --ok:#4CC584; --ok-soft:#163626; --warn:#FFAA4D; --warn-soft:#3A2814; --bad:#FF7A70;
+  --c-stay:#A69BFF; --c-travel:#6CB6FF; --c-act:#4CC584; --c-food:#FF9F5A; --c-other:#9AA6B4;
+  --shadow:0 1px 2px rgba(0,0,0,.3);
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0E141B; --surface:#17202A; --surface-2:#1D2833; --line:#2A3643;
+  --ink:#E9EEF4; --muted:#A3AFBD; --faint:#76828F;
+  --accent:#FFC629; --accent-ink:#1A1400; --accent-soft:#3A3010;
+  --action:#7DA7FF; --action-soft:#1C2B47;
+  --ok:#4CC584; --ok-soft:#163626; --warn:#FFAA4D; --warn-soft:#3A2814; --bad:#FF7A70;
+  --c-stay:#A69BFF; --c-travel:#6CB6FF; --c-act:#4CC584; --c-food:#FF9F5A; --c-other:#9AA6B4;
+  --shadow:0 1px 2px rgba(0,0,0,.3);
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{color:var(--ink);font:16px/1.45 var(--font);-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;touch-action:manipulation}
+:focus-visible{outline:3px solid var(--action);outline-offset:2px;border-radius:8px}
+a{color:var(--action)}
+svg.i{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.wrap{max-width:640px;margin:0 auto;padding-inline:16px;padding-block:0 calc(var(--tabh) + 32px)}
+
+/* header */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);margin-inline:-16px;padding:12px 16px 8px}
+.toprow{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.trip h1{font:700 1.5rem/1.1 var(--font-d);margin:0;letter-spacing:-.01em;text-wrap:balance}
+.trip p{margin:2px 0 0;color:var(--muted);font-size:.875rem}
+.sync{font-size:.75rem;color:var(--faint);display:flex;align-items:center;gap:6px;white-space:nowrap;padding-top:6px}
+.sync i{width:8px;height:8px;border-radius:50%;background:var(--ok);display:inline-block}
+.sync.busy i{background:var(--accent)} .sync.err i{background:var(--bad)} .sync.local i{background:var(--faint)}
+.summary{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:.8125rem;padding:5px 10px;border-radius:999px;background:var(--surface);border:1px solid var(--line);font-variant-numeric:tabular-nums}
+.pill.warn{background:var(--warn-soft);border-color:transparent;color:var(--warn)}
+.pill.ok{background:var(--ok-soft);border-color:transparent;color:var(--ok)}
+.pill.count{background:var(--accent);border-color:transparent;color:var(--accent-ink);font-weight:700}
+
+/* date strip */
+.strip{display:flex;gap:6px;overflow-x:auto;scroll-snap-type:x proximity;margin:10px -16px 0;padding:2px 16px 6px;scrollbar-width:none}
+.strip::-webkit-scrollbar{display:none}
+.dchip{scroll-snap-align:center;flex:none;width:48px;padding:6px 0 7px;border-radius:12px;border:1px solid var(--line);background:var(--surface);display:flex;flex-direction:column;align-items:center;gap:1px}
+.dchip small{font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.dchip b{font:700 1.125rem/1.1 var(--font-d);font-variant-numeric:tabular-nums}
+.dchip .dot{width:6px;height:6px;border-radius:50%;background:var(--line)}
+.dchip .dot.ok{background:var(--ok)} .dchip .dot.open{background:var(--accent)} .dchip .dot.miss{background:var(--warn)}
+.dchip.sel{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.dchip.sel small{color:inherit;opacity:.75}
+.dchip.today{border-color:var(--action);border-width:2px}
+
+/* day view */
+.dayhead{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin:14px 0 4px}
+.dayhead h2{font:700 1.75rem/1.1 var(--font-d);margin:0;letter-spacing:-.01em}
+.dayhead .sub{color:var(--muted);font-size:.875rem;margin-top:4px;font-variant-numeric:tabular-nums}
+.navbtns{display:flex;gap:6px}
+.iconbtn{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center}
+.iconbtn:disabled{opacity:.35}
+.place{display:flex;align-items:center;gap:8px;margin:8px 0 6px;padding:10px 12px;border-radius:12px;background:var(--surface);border:1px dashed var(--line);width:100%;text-align:left;color:var(--muted)}
+.place.set{border-style:solid;color:var(--ink)}
+.place span{flex:1;min-width:0}
+.place em{display:block;font-style:normal;font-size:.8125rem;color:var(--muted);white-space:pre-wrap}
+.notice{display:flex;gap:10px;padding:10px 12px;border-radius:12px;background:var(--accent-soft);font-size:.875rem;margin:8px 0}
+.notice b{display:block}
+.notice.blue{background:var(--action-soft)}
+
+.sec{margin-top:18px}
+.sechead{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.sechead h3{margin:0;font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);flex:1}
+.sechead .ic{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;color:#fff}
+.sechead .ic svg{width:16px;height:16px}
+.addsmall{border:0;background:none;color:var(--action);font-weight:700;font-size:.875rem;padding:6px 4px}
+.list{display:flex;flex-direction:column;background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
+.row{display:flex;align-items:center;gap:4px;border-top:1px solid var(--line);min-height:56px}
+.row:first-child{border-top:0}
+.check{width:52px;align-self:stretch;border:0;background:none;display:grid;place-items:center;flex:none}
+.check span{width:26px;height:26px;border-radius:50%;border:2px solid var(--faint);display:grid;place-items:center;color:transparent;transition:background .15s,border-color .15s}
+.check span svg{width:16px;height:16px;stroke-width:3}
+.check.on span{background:var(--ok);border-color:var(--ok);color:#fff}
+.rowmain{flex:1;min-width:0;border:0;background:none;text-align:left;padding:10px 12px 10px 0;display:flex;align-items:center;gap:8px}
+.rowmain .t{flex:1;min-width:0}
+.rowmain .t b{display:block;font-weight:700;overflow-wrap:anywhere}
+.rowmain .t small{display:block;color:var(--muted);font-size:.8125rem;overflow-wrap:anywhere}
+.row.done .t b{color:var(--muted)}
+.tag{font-size:.6875rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:3px 7px;border-radius:6px;white-space:nowrap}
+.tag.todo{background:var(--warn-soft);color:var(--warn)}
+.tag.ok{background:var(--ok-soft);color:var(--ok)}
+.time{font-variant-numeric:tabular-nums;font-weight:700;font-size:.875rem;min-width:44px;color:var(--ink)}
+.chev{color:var(--faint)}
+.empty{border:1.5px dashed var(--line);border-radius:var(--r);padding:14px;display:flex;align-items:center;gap:10px;color:var(--muted);background:transparent;width:100%;text-align:left}
+.empty.warn{border-color:var(--warn);color:var(--warn);background:var(--warn-soft)}
+.empty b{color:inherit}
+.subline{font-size:.8125rem;color:var(--muted);padding:8px 14px;border-top:1px solid var(--line);background:var(--surface-2)}
+.bigadd{margin-top:20px;width:100%;padding:14px;border-radius:var(--r);border:0;background:var(--accent);color:var(--accent-ink);font-weight:700;display:flex;justify-content:center;align-items:center;gap:8px}
+
+/* overview */
+.h2{font:700 1.25rem/1.2 var(--font-d);margin:18px 0 8px}
+.ov{display:flex;flex-direction:column;gap:8px}
+.ovrow{display:flex;gap:12px;align-items:center;padding:10px 12px;border-radius:var(--r);background:var(--surface);box-shadow:var(--shadow);border:0;text-align:left;width:100%}
+.ovrow.today{outline:2px solid var(--action)}
+.ovdate{width:46px;text-align:center;flex:none}
+.ovdate small{display:block;font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.ovdate b{font:700 1.375rem/1 var(--font-d);font-variant-numeric:tabular-nums}
+.ovmain{flex:1;min-width:0}
+.ovmain .pl{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ovmain .pl.none{color:var(--faint);font-weight:400}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:.75rem;padding:2px 7px 2px 5px;border-radius:6px;background:var(--surface-2);color:var(--muted);font-variant-numeric:tabular-nums}
+.chip svg{width:13px;height:13px}
+.chip.ok{background:var(--ok-soft);color:var(--ok)} .chip.todo{background:var(--warn-soft);color:var(--warn)} .chip.miss{background:var(--warn-soft);color:var(--warn);font-weight:700}
+.daybadge{font-size:.6875rem;color:var(--faint);font-variant-numeric:tabular-nums}
+
+/* progress */
+.prog{height:8px;border-radius:99px;background:var(--line);overflow:hidden;margin:8px 0 4px}
+.prog i{display:block;height:100%;background:var(--ok);border-radius:99px;transition:width .3s}
+.groupname{font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:18px 0 8px;display:flex;justify-content:space-between;align-items:center}
+
+/* info */
+.card{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);padding:14px;margin-bottom:10px}
+.card h4{margin:0 0 4px;font:700 1.0625rem/1.25 var(--font-d)}
+.card p{margin:4px 0;font-size:.9375rem}
+.card .src{font-size:.75rem;color:var(--faint);margin-top:8px}
+.card .src a{color:var(--muted)}
+.card.hl{background:var(--accent-soft);box-shadow:none}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:.9375rem}
+.kv dt{color:var(--muted)} .kv dd{margin:0;overflow-wrap:anywhere}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.field label{font-size:.8125rem;color:var(--muted);font-weight:700}
+.in{width:100%;font-size:16px;padding:11px 12px;border-radius:11px;border:1px solid var(--line);background:var(--surface-2);min-height:46px;-webkit-appearance:none;appearance:none}
+textarea.in{min-height:84px;resize:vertical}
+select.in{background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;background-size:5px 5px;background-repeat:no-repeat;padding-right:32px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{border:0;border-radius:12px;padding:13px 16px;font-weight:700;min-height:48px}
+.btn.pri{background:var(--ink);color:var(--bg)}
+.btn.sec{background:var(--surface-2);border:1px solid var(--line)}
+.btn.danger{background:transparent;color:var(--bad);border:1px solid var(--line)}
+.btn.danger.armed{background:var(--bad);color:#fff;border-color:var(--bad)}
+.btn.wide{width:100%}
+.btnrow{display:flex;gap:10px;margin-top:6px}
+.btnrow .btn{flex:1}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{border:1px solid var(--line);background:var(--surface-2);border-radius:10px;padding:9px 11px;font-size:.875rem;display:inline-flex;align-items:center;gap:6px;min-height:42px}
+.seg button svg{width:16px;height:16px}
+.seg button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.seg.status button.on.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.seg.status button.on.todo{background:var(--warn);border-color:var(--warn);color:#fff}
+.dayctl{display:flex;gap:6px}
+.dayctl select{flex:1}
+.stepper{display:flex;align-items:center;gap:10px}
+.stepper b{min-width:2ch;text-align:center;font-size:1.125rem;font-variant-numeric:tabular-nums}
+.hint{font-size:.8125rem;color:var(--muted);margin:-4px 0 12px}
+.banner{background:var(--action-soft);border-radius:12px;padding:10px 12px;font-size:.875rem;margin-top:10px}
+
+/* tabbar */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:10;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.tabs nav{max-width:640px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);height:var(--tabh)}
+.tabs button{border:0;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:.6875rem;color:var(--faint);font-weight:700}
+.tabs button svg{width:24px;height:24px}
+.tabs button.on{color:var(--ink)}
+.tabs button.on svg{color:var(--action)}
+
+/* sheet */
+.scrim{position:fixed;inset:0;z-index:20;background:rgba(10,16,24,.45);opacity:0;pointer-events:none;transition:opacity .2s}
+.scrim.open{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:21;max-width:640px;margin:0 auto;background:var(--surface);border-radius:20px 20px 0 0;max-height:92%;display:flex;flex-direction:column;transform:translateY(105%);transition:transform .25s ease;padding-bottom:env(safe-area-inset-bottom,0px)}
+.sheet.open{transform:none}
+.sheethead{display:flex;align-items:center;justify-content:space-between;padding:10px 16px 6px;border-bottom:1px solid var(--line)}
+.sheethead h3{margin:0;font:700 1.125rem/1.2 var(--font-d)}
+.sheethead::before{content:"";position:absolute;top:6px;left:50%;width:36px;height:4px;margin-left:-18px;border-radius:4px;background:var(--line)}
+.linkbtn{border:0;background:none;color:var(--action);font-weight:700;padding:10px 4px;min-height:44px}
+.sheetbody{overflow-y:auto;padding:14px 16px 20px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+
+.toast{position:fixed;left:16px;right:16px;bottom:calc(var(--tabh) + 14px + env(safe-area-inset-bottom,0px));z-index:30;max-width:520px;margin:0 auto;background:var(--ink);color:var(--bg);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px;font-size:.9375rem;transform:translateY(20px);opacity:0;pointer-events:none;transition:.2s}
+.toast.show{transform:none;opacity:1;pointer-events:auto}
+.toast span{flex:1}
+.toast button{border:0;background:none;color:var(--accent);font-weight:700;padding:4px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="top" id="top"></header>
+  <main id="main"></main>
+</div>
+
+<div class="tabs"><nav id="tabs">
+  <button data-tab="day"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/><path d="M8 14h3"/></svg>Dag</button>
+  <button data-tab="ov"><svg class="i" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/></svg>Overzicht</button>
+  <button data-tab="prep"><svg class="i" viewBox="0 0 24 24"><path d="M4 6l2 2 3-3M4 13l2 2 3-3"/><path d="M12 7h8M12 14h8M5 20h15"/></svg>Voorbereiden</button>
+  <button data-tab="info"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/></svg>Info</button>
+</nav></div>
+
+<div class="scrim" id="scrim"></div>
+<section class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheettitle">
+  <div class="sheethead"><button class="linkbtn" data-a="close">Annuleer</button><h3 id="sheettitle"></h3><button class="linkbtn" data-a="sheetsave">Bewaar</button></div>
+  <div class="sheetbody" id="sheetbody"></div>
+</section>
+<div class="toast" id="toast" role="status"><span id="toastmsg"></span><button id="toastbtn" hidden></button></div>
+
+<script>
+(() => {
+'use strict';
+/* ---------- constants ---------- */
+const DEF_META = {name:'Mijn reis', destination:'', start:'', end:'', insurer:'', insurerPhone:'', policy:'', extra:''};
+const IC = {
+  stay:'<svg class="i" viewBox="0 0 24 24"><path d="M3 19V6M3 15h18v4M21 15v-3a3 3 0 0 0-3-3h-7v6"/><circle cx="7" cy="11" r="2"/></svg>',
+  travel:'<svg class="i" viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>',
+  act:'<svg class="i" viewBox="0 0 24 24"><path d="M3 9V6h18v3a3 3 0 0 0 0 6v3H3v-3a3 3 0 0 0 0-6z"/><path d="M14 6v2M14 11v2M14 16v2"/></svg>',
+  food:'<svg class="i" viewBox="0 0 24 24"><path d="M5 3v7a2 2 0 0 0 2 2 2 2 0 0 0 2-2V3M7 12v9M18 21V3c-2 0-3.5 2.5-3.5 6s1.5 4 3.5 4"/></svg>',
+  other:'<svg class="i" viewBox="0 0 24 24"><path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z"/></svg>',
+  check:'<svg class="i" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  chev:'<svg class="i chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>',
+  left:'<svg class="i" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>',
+  right:'<svg class="i" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>',
+  pin:'<svg class="i" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>',
+  plus:'<svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
+  clock:'<svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>'
+};
+const CATS = {
+  stay:{label:'Verblijf', color:'var(--c-stay)'},
+  travel:{label:'Reizen', color:'var(--c-travel)'},
+  act:{label:'Activiteiten', color:'var(--c-act)'},
+  food:{label:'Eten & drinken', color:'var(--c-food)'},
+  other:{label:'Overig', color:'var(--c-other)'}
+};
+const CAT_ORDER = ['stay','travel','act','food','other'];
+const WD = ['zo','ma','di','wo','do','vr','za'];
+const WDL = ['zondag','maandag','dinsdag','woensdag','donderdag','vrijdag','zaterdag'];
+const MON = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+const MONL = ['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december'];
+const PREP_GROUPS = ['Documenten','Geld & verzekering','Gezondheid','Telefoon & digitaal','Thuis','Inpakken'];
+// Trip-specific content (info cards, date notices) lives in the data, not in this public code.
+const COLS = ['items','days','prep','info','notices'];
+const IS_APP = window.RP_APP === true;           // set by the offline-app wrapper (app/index.html)
+const APP_URL = 'https://APP_URL_PLACEHOLDER/';  // offline app address, shown in the claude.ai version
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n => String(n).padStart(2,'0');
+const parseD = s => { const [y,m,d] = s.split('-').map(Number); return new Date(Date.UTC(y,m-1,d)); };
+const fmtD = d => d.getUTCFullYear()+'-'+pad(d.getUTCMonth()+1)+'-'+pad(d.getUTCDate());
+const addDays = (s,n) => { const d = parseD(s); d.setUTCDate(d.getUTCDate()+n); return fmtD(d); };
+const diffDays = (a,b) => Math.round((parseD(b)-parseD(a))/864e5);
+const isDate = s => /^\d{4}-\d{2}-\d{2}$/.test(s||'');
+const todayStr = () => { const t = new Date(); return t.getFullYear()+'-'+pad(t.getMonth()+1)+'-'+pad(t.getDate()); };
+const short = s => { const d = parseD(s); return WD[d.getUTCDay()]+' '+d.getUTCDate()+' '+MON[d.getUTCMonth()]; };
+const longD = s => { const d = parseD(s); return WDL[d.getUTCDay()]+' '+d.getUTCDate()+' '+MONL[d.getUTCMonth()]; };
+const newId = () => Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+const lsGet = k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } };
+const lsSet = (k,v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+
+/* ---------- state ---------- */
+const S = {
+  meta:{...DEF_META}, items:{}, days:{}, prep:{}, info:{}, notices:{},
+  mode:'loading', // loading | db | local
+  tab: lsGet('rp-tab') || 'day',
+  sel: null, pending:0, err:false, readOnly:false, code:''
+};
+function loadInto(src){
+  if (!src) return;
+  S.meta = {...DEF_META, ...(src.meta||{})};
+  for (const c of COLS) S[c] = src[c] || {};
+}
+const snapshot = () => { const o = {meta:S.meta}; for (const c of COLS) o[c] = S[c]; return o; };
+loadInto(lsGet(IS_APP ? 'rp-local-v1' : 'rp-cache-v1'));
+
+const tripDays = () => {
+  const {start,end} = S.meta;
+  if (!isDate(start) || !isDate(end) || diffDays(start,end) < 0 || diffDays(start,end) > 120) return [];
+  const out = []; for (let d = start; d <= end; d = addDays(d,1)) out.push(d); return out;
+};
+const itemList = () => Object.values(S.items);
+const sortItems = arr => arr.sort((a,b) => (a.time||'99') .localeCompare(b.time||'99') || (a.created||0)-(b.created||0));
+const staysOn = d => itemList().filter(i => i.cat==='stay' && isDate(i.day) && d >= i.day && d < addDays(i.day, Math.max(1, +i.nights||1)));
+const checkoutsOn = d => itemList().filter(i => i.cat==='stay' && isDate(i.day) && addDays(i.day, Math.max(1,+i.nights||1)) === d);
+const itemsOn = (d,cat) => sortItems(itemList().filter(i => i.day===d && (!cat || i.cat===cat)));
+
+function dayStatus(d){
+  const days = tripDays();
+  const needsBed = d !== days[days.length-1];
+  const stays = staysOn(d);
+  const own = itemsOn(d).filter(i => i.cat!=='stay');
+  const all = [...stays, ...own];
+  const open = all.filter(i => !i.done).length;
+  const bed = !needsBed ? 'none' : stays.length===0 ? 'miss' : stays.every(s=>s.done) ? 'ok' : 'todo';
+  let dot = '';
+  if (bed==='miss') dot = 'miss'; else if (open) dot = 'open'; else if (all.length) dot = 'ok';
+  return {bed, stays, own, open, total:all.length, dot};
+}
+function totals(){
+  const days = tripDays();
+  const inTrip = itemList().filter(i => days.includes(i.day));
+  const done = inTrip.filter(i=>i.done).length;
+  const missing = days.slice(0,-1).filter(d => staysOn(d).length===0).length;
+  return {done, total:inTrip.length, missing, nights:Math.max(0,days.length-1)};
+}
+
+/* ---------- storage layer ---------- */
+let db = null;
+const chains = {};
+function persistCache(){ lsSet('rp-cache-v1', snapshot()); refreshCode(); }
+function persistLocal(){ if (S.mode==='local') lsSet('rp-local-v1', snapshot()); persistCache(); }
+
+function queue(path, fn){
+  S.pending++; renderSync();
+  const p = (chains[path] || Promise.resolve()).then(fn).then(() => { S.err=false; }, e => {
+    S.err = true;
+    if (e && e.code==='invalid_argument') { S.readOnly = true; toast('Je kunt deze planner alleen bekijken, niet wijzigen.'); }
+    else if (e && e.code==='quota_exceeded') toast('De opslag is vol. Verwijder oude onderdelen.');
+    else toast('Opslaan mislukt. Controleer je verbinding en probeer het opnieuw.');
+  }).finally(() => { S.pending--; renderSync(); });
+  chains[path] = p; return p;
+}
+function save(col, id, data){
+  const clean = JSON.parse(JSON.stringify(data)); delete clean.id;
+  if (col==='trip') S.meta = {...DEF_META, ...clean}; else S[col][id] = {...clean, id};
+  render();
+  if (S.mode==='db') return queue(col+'/'+id, () => db.collection(col).doc(id).set(clean));
+  persistLocal(); return Promise.resolve();
+}
+function remove(col, id){
+  delete S[col][id]; render();
+  if (S.mode==='db') return queue(col+'/'+id, () => db.collection(col).doc(id).delete());
+  persistLocal(); return Promise.resolve();
+}
+
+let raf = 0;
+function scheduleRender(){ if (!raf) raf = requestAnimationFrame(() => { raf = 0; persistCache(); render(); }); }
+
+async function connect(){
+  db = !IS_APP && window.claude && window.claude.use ? await window.claude.use('db').catch(() => null) : null;
+  if (!db){
+    S.mode = 'local';
+    loadInto(lsGet('rp-local-v1'));
+    if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+    render(); refreshCode(); checkHashImport(); return;
+  }
+  S.mode = 'db';
+  const onErr = e => { S.err = true; renderSync(); if (e && e.code==='unavailable') setTimeout(connect, 3000); };
+  const toMap = snap => { const m = {}; snap.docs.forEach(d => { m[d.id] = {...d.data(), id:d.id}; }); return m; };
+  for (const c of COLS) db.collection(c).onSnapshot(s => { S[c] = toMap(s); scheduleRender(); }, onErr);
+  db.doc('trip/meta').onSnapshot(s => { S.meta = s.exists ? {...DEF_META, ...s.data()} : {...DEF_META}; scheduleRender(); }, onErr);
+}
+
+/* ---------- render ---------- */
+function pickSel(){
+  const days = tripDays();
+  if (S.sel && days.includes(S.sel)) return;
+  const t = todayStr(); const stored = lsGet('rp-sel');
+  S.sel = days.includes(t) ? t : days.includes(stored) ? stored : days[0] || null;
+}
+function renderSync(){
+  const el = $('#sync'); if (!el) return;
+  let cls='', txt='Opgeslagen';
+  if (S.mode==='loading'){ cls='busy'; txt='Laden…'; }
+  else if (S.mode==='local'){ cls='local'; txt='Alleen op dit toestel'; }
+  else if (S.pending){ cls='busy'; txt='Opslaan…'; }
+  else if (S.err){ cls='err'; txt='Niet opgeslagen'; }
+  el.className = 'sync '+cls; el.innerHTML = '<i></i>'+txt;
+}
+function renderTop(){
+  const days = tripDays(); const m = S.meta; const t = totals();
+  const today = todayStr();
+  let when = '';
+  if (days.length){
+    const until = diffDays(today, m.start);
+    if (until > 1) when = 'Nog '+until+' dagen';
+    else if (until === 1) when = 'Morgen vertrek';
+    else if (today <= m.end) when = 'Dag '+(diffDays(m.start,today)+1)+' van '+days.length;
+    else when = 'Afgelopen';
+  }
+  const range = days.length ? short(m.start)+' – '+short(m.end)+' · '+days.length+' dagen' : 'Stel je reisdatums in bij Info';
+  let html = `<div class="toprow"><div class="trip"><h1>${esc(m.name||'Mijn reis')}</h1><p>${m.destination?esc(m.destination)+' · ':''}${range}</p></div><div class="sync" id="sync"></div></div>
+  <div class="summary">${when?`<span class="pill count">${when}</span>`:''}
+  <span class="pill ${t.total && t.done===t.total?'ok':''}">${IC.check} ${t.done}/${t.total} geregeld</span>
+  ${t.missing?`<span class="pill warn">${IC.stay} ${t.missing} ${t.missing===1?'nacht':'nachten'} zonder verblijf</span>`:(t.nights?`<span class="pill ok">${IC.stay} alle nachten gedekt</span>`:'')}</div>`;
+  if (S.tab==='day' && days.length){
+    html += `<div class="strip" id="strip">${days.map(d => {
+      const st = dayStatus(d), dt = parseD(d);
+      return `<button class="dchip ${d===S.sel?'sel':''} ${d===today?'today':''}" data-a="sel" data-d="${d}" aria-label="${longD(d)}"><small>${WD[dt.getUTCDay()]}</small><b>${dt.getUTCDate()}</b><span class="dot ${st.dot}"></span></button>`;
+    }).join('')}</div>`;
+  }
+  $('#top').innerHTML = html; renderSync();
+  const selEl = document.querySelector('.dchip.sel');
+  const strip = $('#strip');
+  if (selEl && strip) strip.scrollLeft = selEl.offsetLeft - strip.clientWidth/2 + selEl.offsetWidth/2;
+}
+function rowHTML(i, extra){
+  const meta = [];
+  if (extra) meta.push(extra);
+  if (i.place) meta.push(esc(i.place));
+  if (i.ref) meta.push('Nr. '+esc(i.ref));
+  return `<div class="row ${i.done?'done':''}">
+    <button class="check ${i.done?'on':''}" data-a="toggle" data-id="${i.id}" aria-label="${i.done?'Markeer als te regelen':'Markeer als geregeld'}"><span>${IC.check}</span></button>
+    <button class="rowmain" data-a="edit" data-id="${i.id}">
+      ${i.time?`<span class="time">${esc(i.time)}</span>`:''}
+      <span class="t"><b>${esc(i.title||'Zonder titel')}</b>${meta.length?`<small>${meta.join(' · ')}</small>`:''}</span>
+      <span class="tag ${i.done?'ok':'todo'}">${i.done?'Geregeld':'Regelen'}</span>${IC.chev}
+    </button></div>`;
+}
+function secHead(cat, d){
+  return `<div class="sechead"><span class="ic" style="background:${CATS[cat].color}">${IC[cat]}</span><h3>${CATS[cat].label}</h3><button class="addsmall" data-a="add" data-cat="${cat}" data-d="${d}">+ Toevoegen</button></div>`;
+}
+function renderDay(){
+  const days = tripDays();
+  if (!days.length) return `<div class="card hl" style="margin-top:16px"><h4>Nog geen planning</h4><p>Heb je een overzetcode of deellink? Importeer die hier. Of stel bij Info zelf een begin- en einddatum in.</p>${S.mode==='db'?'':`<div class="btnrow"><button class="btn pri" data-a="import">Planning importeren</button></div>`}</div>`;
+  const d = S.sel, idx = days.indexOf(d), last = idx===days.length-1;
+  const st = dayStatus(d), info = S.days[d] || {};
+  let h = `<div class="dayhead"><div><h2>${longD(d).replace(/^\w/,c=>c.toUpperCase())}</h2>
+    <div class="sub">Dag ${idx+1} van ${days.length}${last?' · terugreis':' · nacht '+(idx+1)}${st.total?` · ${st.total-st.open}/${st.total} geregeld`:''}</div></div>
+    <div class="navbtns"><button class="iconbtn" data-a="sel" data-d="${days[idx-1]||''}" ${idx===0?'disabled':''} aria-label="Vorige dag">${IC.left}</button><button class="iconbtn" data-a="sel" data-d="${days[idx+1]||''}" ${last?'disabled':''} aria-label="Volgende dag">${IC.right}</button></div></div>
+    <button class="place ${info.place?'set':''}" data-a="editday" data-d="${d}">${IC.pin}<span>${info.place?esc(info.place):'Waar ben je deze dag?'}${info.note?`<em>${esc(info.note)}</em>`:''}</span>${IC.chev}</button>`;
+  const n = S.notices[d];
+  if (n) h += `<div class="notice ${n.blue?'blue':''}">${IC.clock}<div><b>${esc(n.t)}</b>${esc(n.d)}</div></div>`;
+
+  // stay
+  h += `<section class="sec">${secHead('stay', d)}`;
+  const outs = checkoutsOn(d);
+  if (st.stays.length || outs.length){
+    h += `<div class="list">${st.stays.map(s => {
+      const nights = Math.max(1,+s.nights||1), k = diffDays(s.day,d)+1;
+      const label = nights===1 ? '1 nacht' : k===1 ? `Inchecken · ${nights} nachten` : `Nacht ${k} van ${nights}`;
+      return rowHTML(s, label);
+    }).join('')}${outs.map(o => `<div class="subline">Uitchecken: ${esc(o.title)}</div>`).join('')}</div>`;
+    if (!last && !st.stays.length) h += `<button class="empty warn" style="margin-top:8px" data-a="add" data-cat="stay" data-d="${d}">${IC.plus}<span><b>Nog geen overnachting</b> voor deze nacht</span></button>`;
+  } else if (last){
+    h += `<div class="empty">Laatste dag: geen overnachting nodig.</div>`;
+  } else {
+    h += `<button class="empty warn" data-a="add" data-cat="stay" data-d="${d}">${IC.plus}<span><b>Nog geen overnachting.</b> Tik om er een toe te voegen.</span></button>`;
+  }
+  h += `</section>`;
+
+  for (const cat of ['travel','act','food','other']){
+    const list = itemsOn(d,cat);
+    if (!list.length && (cat==='food'||cat==='other')) continue;
+    h += `<section class="sec">${secHead(cat,d)}`;
+    h += list.length ? `<div class="list">${list.map(i=>rowHTML(i)).join('')}</div>`
+      : `<button class="empty" data-a="add" data-cat="${cat}" data-d="${d}">${IC.plus}<span>${cat==='travel'?'Geen vervoer gepland':'Nog niets gepland'}</span></button>`;
+    h += `</section>`;
+  }
+  h += `<button class="bigadd" data-a="add" data-cat="" data-d="${d}">${IC.plus} Iets toevoegen aan deze dag</button>`;
+  return h;
+}
+function renderOverview(){
+  const days = tripDays(); const today = todayStr();
+  let h = `<div class="h2">Alle dagen</div><div class="ov">`;
+  h += days.map((d,idx) => {
+    const st = dayStatus(d), dt = parseD(d), info = S.days[d]||{};
+    const chips = [];
+    if (st.bed==='miss') chips.push(`<span class="chip miss">${IC.stay} geen verblijf</span>`);
+    else if (st.bed!=='none') chips.push(`<span class="chip ${st.bed}">${IC.stay} ${esc(st.stays[0].title)}</span>`);
+    for (const cat of ['travel','act','food','other']){
+      const l = st.own.filter(i=>i.cat===cat); if (!l.length) continue;
+      const done = l.filter(i=>i.done).length;
+      chips.push(`<span class="chip ${done===l.length?'ok':'todo'}">${IC[cat]} ${done}/${l.length}</span>`);
+    }
+    return `<button class="ovrow ${d===today?'today':''}" data-a="goday" data-d="${d}">
+      <div class="ovdate"><small>${WD[dt.getUTCDay()]}</small><b>${dt.getUTCDate()}</b><small>${MON[dt.getUTCMonth()]}</small></div>
+      <div class="ovmain"><div class="pl ${info.place?'':'none'}">${info.place?esc(info.place):'Plaats nog open'}</div><div class="chips">${chips.join('')||'<span class="chip">nog leeg</span>'}</div></div>
+      <span class="daybadge">dag ${idx+1}</span></button>`;
+  }).join('');
+  h += `</div>`;
+  const unplanned = sortItems(itemList().filter(i => !i.day));
+  const outside = sortItems(itemList().filter(i => isDate(i.day) && !days.includes(i.day)));
+  h += `<div class="groupname"><span>Nog in te plannen (${unplanned.length})</span><button class="addsmall" data-a="add" data-cat="act" data-d="">+ Idee</button></div>`;
+  h += unplanned.length ? `<div class="list">${unplanned.map(i=>rowHTML(i, CATS[i.cat]?.label)).join('')}</div>`
+    : `<div class="empty">Ideeën zonder vaste dag zet je hier. Later geef je ze een dag.</div>`;
+  if (outside.length) h += `<div class="groupname"><span>Buiten de reisperiode (${outside.length})</span></div><div class="list">${outside.map(i=>rowHTML(i, short(i.day))).join('')}</div>`;
+  return h;
+}
+function renderPrep(){
+  const list = Object.values(S.prep);
+  const done = list.filter(p=>p.done).length;
+  const open = sortItems(itemList().filter(i => !i.done && i.day)).sort((a,b)=>a.day.localeCompare(b.day));
+  let h = `<div class="h2">Nog te boeken</div>`;
+  h += open.length ? `<p class="hint" style="margin:0 0 8px">Alles uit je planning dat nog niet geregeld is, op datum.</p><div class="list">${open.map(i=>rowHTML(i, short(i.day)+' · '+(CATS[i.cat]?.label||''))).join('')}</div>`
+    : `<div class="empty">Alles in je planning staat op geregeld.</div>`;
+  h += `<div class="h2">Checklist vóór vertrek</div>`;
+  h += `<div class="prog"><i style="width:${list.length?Math.round(done/list.length*100):0}%"></i></div><p class="hint" style="margin:0">${done} van ${list.length} afgevinkt</p>`;
+  const groups = [...PREP_GROUPS, ...new Set(list.map(p=>p.group).filter(g=>g && !PREP_GROUPS.includes(g)))];
+  for (const g of groups){
+    const items = list.filter(p => (p.group||'Overig')===g).sort((a,b)=>(a.order||0)-(b.order||0) || (a.created||0)-(b.created||0));
+    h += `<div class="groupname"><span>${esc(g)}</span><button class="addsmall" data-a="addprep" data-g="${esc(g)}">+ Toevoegen</button></div>`;
+    if (!items.length){ h += `<div class="empty">Nog niets in deze groep.</div>`; continue; }
+    h += `<div class="list">${items.map(p => `<div class="row ${p.done?'done':''}">
+      <button class="check ${p.done?'on':''}" data-a="toggleprep" data-id="${p.id}" aria-label="Afvinken"><span>${IC.check}</span></button>
+      <button class="rowmain" data-a="editprep" data-id="${p.id}"><span class="t"><b>${esc(p.title)}</b>${p.note?`<small>${esc(p.note)}</small>`:''}</span>${IC.chev}</button></div>`).join('')}</div>`;
+  }
+  return h;
+}
+function renderInfo(){
+  const m = S.meta;
+  const cards = Object.values(S.info).sort((a,b) => (a.order||0)-(b.order||0));
+  let h = `<div class="h2">Reisgegevens</div><div class="card">
+    <dl class="kv"><dt>Reis</dt><dd>${esc(m.name)}</dd><dt>Bestemming</dt><dd>${esc(m.destination)||'—'}</dd><dt>Periode</dt><dd>${isDate(m.start)&&isDate(m.end)?short(m.start)+' t/m '+short(m.end):'—'}</dd>
+    <dt>Reisverzekering</dt><dd>${esc(m.insurer)||'—'}</dd><dt>Alarmnummer</dt><dd>${esc(m.insurerPhone)||'—'}</dd><dt>Polisnummer</dt><dd>${esc(m.policy)||'—'}</dd>${m.extra?`<dt>Notities</dt><dd style="white-space:pre-wrap">${esc(m.extra)}</dd>`:''}</dl>
+    <div class="btnrow" style="margin-top:12px"><button class="btn sec" data-a="editmeta">Gegevens wijzigen</button><button class="btn sec" data-a="shift">Planning verschuiven</button></div></div>`;
+  h += `<div class="h2">Noodnummers</div><div class="card hl">
+    <dl class="kv"><dt>BZ 24/7 Contactcentrum</dt><dd><b>+31 247 247 247</b><br><small>Hulp van Buitenlandse Zaken bij nood in het buitenland, ook via de 24/7 BZ-reisapp.</small></dd>
+    <dt>Reisverzekering</dt><dd><b>${esc(m.insurerPhone)||'Nog invullen bij Gegevens wijzigen'}</b></dd></dl>
+    <div class="src">Bron BZ-nummer: <a href="https://www.nederlandwereldwijd.nl/documenten/vragen-en-antwoorden/wat-staat-er-in-de-24-7-bz-reisapp" target="_blank" rel="noopener">nederlandwereldwijd.nl</a> · controleer het nummer in de app vóór vertrek</div></div>`;
+  if (cards.length){
+    h += `<div class="h2">Belangrijk voor deze reis</div>`;
+    h += cards.map(c => `<div class="card"><h4>${esc(c.title)}</h4>${String(c.body||'').split('\n').filter(Boolean).map(p=>`<p>${esc(p)}</p>`).join('')}
+      ${(c.sources||[]).length?`<div class="src">Bron: ${c.sources.map(s=>/^https:\/\//.test(s.u||'')?`<a href="${esc(s.u)}" target="_blank" rel="noopener">${esc(s.t)}</a>`:esc(s.t)).join(', ')}${c.checked?' · gecontroleerd '+short(c.checked)+' '+c.checked.slice(0,4):''}</div>`:''}</div>`).join('');
+  }
+  h += `<div class="h2">Je gegevens</div>`;
+  if (S.mode==='db'){
+    h += `<div class="card"><h4>Overzetten naar de offline-app</h4>
+      <p>De offline-app werkt zonder inloggen en zonder internet. Zet je planning er zo in over:</p>
+      <p>1. Tik hieronder op <b>Kopieer overzetcode</b>.<br>2. Open de offline-app en ga naar Info → <b>Importeren</b>.<br>3. Plak de code en tik op Importeer.</p>
+      <div class="btnrow"><button class="btn pri" data-a="copycode">Kopieer overzetcode</button></div>
+      ${APP_URL.includes('PLACEHOLDER')?'':`<p style="margin-top:10px"><a href="${APP_URL}" target="_blank" rel="noopener">Open de offline-app</a></p>`}
+      <p class="hint" style="margin-top:8px">Na het overzetten is de app je hoofdplanning. Wijzigingen hier gaan niet vanzelf naar de app.</p></div>`;
+  } else {
+    const lb = lsGet('rp-lastbackup');
+    h += `<div class="card"><h4>Back-up</h4><p>Je planning staat alleen op dit toestel. Maak af en toe een back-up en bewaar die in Bestanden → iCloud Drive.</p>
+      <p class="hint" style="margin:6px 0 0">Laatste back-up: ${lb?new Date(lb).toLocaleString('nl-NL',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'nog nooit'}</p>
+      <div class="btnrow"><button class="btn pri" data-a="backup">Back-up maken</button></div></div>
+      <div class="card"><h4>Delen met reisgenoot</h4><p>Stuur een link met je planning, bijvoorbeeld via WhatsApp. Je reisgenoot opent de link en tikt op Importeer. Daarna heeft ieder een eigen kopie; die wordt niet live bijgewerkt.</p>
+      <div class="btnrow"><button class="btn sec" data-a="sharelink">Deel planning</button></div></div>
+      <div class="card"><h4>Importeren</h4><p>Plak een overzetcode of deellink, of kies een back-upbestand.</p>
+      <div class="btnrow"><button class="btn sec" data-a="import">Importeren</button></div></div>`;
+    if (!IS_APP) h += `<div class="banner">Deze versie kan nu niet online opslaan. Wijzigingen staan alleen in deze browser.</div>`;
+  }
+  h += `<div class="card"><h4>Deze planner op je iPhone</h4>${IS_APP
+    ? `<p>Open deze pagina in Safari en kies Deel → Zet op beginscherm. Daarna werkt de app ook zonder internet.</p>`
+    : `<p>Je wijzigingen worden online bewaard. Zonder internet zie je de laatst geladen versie.</p>`}</div>`;
+  return h;
+}
+
+/* ---------- export / import ---------- */
+const b64u = bytes => { let s = ''; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i+0x8000)); return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); };
+const fromB64u = str => { str = str.replace(/-/g,'+').replace(/_/g,'/'); while (str.length % 4) str += '='; const bin = atob(str); const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u; };
+function bundle(){
+  const strip = map => { const o = {}; for (const [k,v] of Object.entries(map||{})) { const c = {...v}; delete c.id; o[k] = c; } return o; };
+  const b = {v:1, exported:new Date().toISOString(), meta:S.meta};
+  for (const c of COLS) b[c] = strip(S[c]);
+  return b;
+}
+async function encodeBundle(obj){
+  const json = JSON.stringify(obj);
+  if (window.CompressionStream){
+    const stream = new Blob([json]).stream().pipeThrough(new CompressionStream('deflate-raw'));
+    return 'RP1.' + b64u(new Uint8Array(await new Response(stream).arrayBuffer()));
+  }
+  return 'RP0.' + b64u(new TextEncoder().encode(json));
+}
+async function decodeBundle(input){
+  const s = String(input||'').trim();
+  let obj;
+  if (s.startsWith('{')) obj = JSON.parse(s);
+  else {
+    const m = s.match(/RP([01])\.([A-Za-z0-9_-]+)/);
+    if (!m) throw new Error('Geen geldige code gevonden.');
+    const bytes = fromB64u(m[2]);
+    if (m[1]==='1'){
+      const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+      obj = JSON.parse(await new Response(stream).text());
+    } else obj = JSON.parse(new TextDecoder().decode(bytes));
+  }
+  if (!obj || obj.v!==1 || !obj.meta || typeof obj.items!=='object') throw new Error('Dit is geen reisplanner-code.');
+  for (const c of COLS) for (const [k,v] of Object.entries(obj[c]||{})) v.id = k;
+  return obj;
+}
+let codeT = 0;
+function refreshCode(){ clearTimeout(codeT); codeT = setTimeout(async () => { try { S.code = await encodeBundle(bundle()); } catch { S.code = ''; } }, 300); }
+function copyText(text, okMsg){
+  const fallback = () => openSheet('Kopieer handmatig', `<p class="hint">Kopiëren lukte niet automatisch. Houd de tekst ingedrukt, kies Selecteer alles en dan Kopieer.</p><textarea class="in" id="f-copy" readonly style="min-height:160px;font-size:13px">${esc(text)}</textarea>`, closeSheet, 'Klaar');
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(() => toast(okMsg), fallback);
+  else fallback();
+}
+function importSheet(prefill){
+  let armedImport = false, parsed = null;
+  openSheet('Importeren', `<div class="field"><label for="f-imp">Overzetcode of deellink</label><textarea class="in" id="f-imp" placeholder="Plak hier (houd ingedrukt → Plak)" style="font-size:13px">${esc(prefill||'')}</textarea></div>
+    <div class="field"><label for="f-file">Of kies een back-upbestand</label><input class="in" type="file" id="f-file" accept=".json,application/json,text/plain"></div>
+    <p class="hint" id="f-impmsg">Importeren vervangt de planning die nu op dit toestel staat. Je kunt het direct daarna ongedaan maken.</p>`, async () => {
+    const msg = $('#f-impmsg');
+    try {
+      if (!parsed){
+        const f = $('#f-file').files[0];
+        parsed = await decodeBundle(f ? await f.text() : $('#f-imp').value);
+      }
+    } catch (e) { msg.textContent = 'Dat lukte niet: ' + (e.message || 'onleesbare code') + ' Controleer of je de hele code hebt geplakt.'; msg.style.color = 'var(--bad)'; parsed = null; return; }
+    const n = Object.keys(parsed.items).length;
+    if (!armedImport){
+      armedImport = true;
+      msg.innerHTML = `<b>Gevonden: “${esc(parsed.meta.name)}” met ${n} onderdelen.</b> Tik nogmaals op Importeer om je huidige planning te vervangen.`;
+      msg.style.color = 'var(--warn)'; return;
+    }
+    const before = snapshot();
+    lsSet('rp-before-import', before);
+    loadInto(parsed); S.sel = null; persistLocal(); closeSheet(); render();
+    toast('Planning geïmporteerd', 'Ongedaan maken', () => { loadInto(before); persistLocal(); render(); });
+  }, 'Importeer');
+  $('#f-imp').addEventListener('input', () => { parsed = null; armedImport = false; });
+  $('#f-file').addEventListener('change', () => { parsed = null; armedImport = false; });
+}
+function checkHashImport(){
+  if (!/^#import=/.test(location.hash)) return;
+  const code = location.hash.slice(8);
+  history.replaceState(null, '', location.pathname + location.search);
+  S.tab = 'info'; render(); importSheet(code);
+}
+async function makeBackup(){
+  const json = JSON.stringify(bundle(), null, 1);
+  const name = 'reisplanner-backup-' + todayStr() + '.json';
+  const file = new File([json], name, {type:'application/json'});
+  try {
+    if (navigator.canShare && navigator.canShare({files:[file]})) await navigator.share({files:[file], title:name});
+    else { const a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 5000); }
+    lsSet('rp-lastbackup', Date.now()); render(); toast('Back-up gemaakt');
+  } catch (e) { if (e && e.name !== 'AbortError') toast('Back-up maken lukte niet.'); }
+}
+async function shareLink(){
+  const code = S.code || await encodeBundle(bundle());
+  const url = location.origin + location.pathname + '#import=' + code;
+  const text = 'Onze reisplanning: open de link en tik op Importeer.';
+  try {
+    if (navigator.share) { await navigator.share({title:S.meta.name||'Reisplanner', text, url}); return; }
+  } catch (e) { if (e && e.name === 'AbortError') return; }
+  copyText(url, 'Link gekopieerd');
+}
+
+function render(){
+  pickSel();
+  renderTop();
+  const main = $('#main');
+  main.innerHTML = S.tab==='ov' ? renderOverview() : S.tab==='prep' ? renderPrep() : S.tab==='info' ? renderInfo() : renderDay();
+  document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab===S.tab));
+}
+
+/* ---------- sheet ---------- */
+let sheetSave = null;
+function openSheet(title, body, onSave, saveLabel='Bewaar'){
+  $('#sheettitle').textContent = title;
+  $('#sheetbody').innerHTML = body;
+  document.querySelector('[data-a="sheetsave"]').textContent = saveLabel;
+  sheetSave = onSave;
+  $('#scrim').classList.add('open'); $('#sheet').classList.add('open');
+}
+function closeSheet(){ $('#scrim').classList.remove('open'); $('#sheet').classList.remove('open'); sheetSave = null; }
+const val = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+
+function dayOptions(sel){
+  const days = tripDays();
+  let o = `<option value="">Nog niet ingepland</option>`;
+  o += days.map(d => `<option value="${d}" ${d===sel?'selected':''}>${short(d)}</option>`).join('');
+  if (isDate(sel) && !days.includes(sel)) o += `<option value="${sel}" selected>${short(sel)} (buiten reis)</option>`;
+  return o;
+}
+function editItem(id, preset){
+  const it = id ? {...S.items[id]} : {title:'', cat:preset.cat||'act', day:preset.day||'', time:'', nights:1, done:false, place:'', ref:'', link:'', note:''};
+  if (!it.cat) it.cat = 'act';
+  const body = `
+    <div class="field"><label for="f-title">Wat</label><input class="in" id="f-title" value="${esc(it.title)}" placeholder="Bijv. Hotel Central, trein naar Porto" autocomplete="off"></div>
+    <div class="field"><label>Soort</label><div class="seg" id="f-cat">${CAT_ORDER.map(c=>`<button type="button" data-v="${c}" class="${c===it.cat?'on':''}">${IC[c]}${CATS[c].label}</button>`).join('')}</div></div>
+    <div class="field"><label>Status</label><div class="seg status" id="f-done"><button type="button" data-v="0" class="todo ${!it.done?'on':''}">Nog regelen</button><button type="button" data-v="1" class="ok ${it.done?'on':''}">Geregeld</button></div></div>
+    <div class="field"><label for="f-day" id="f-daylabel">${it.cat==='stay'?'Incheckdag':'Dag'}</label><div class="dayctl"><button type="button" class="iconbtn" data-a="dayshift" data-n="-1" aria-label="Dag eerder">${IC.left}</button><select class="in" id="f-day">${dayOptions(it.day)}</select><button type="button" class="iconbtn" data-a="dayshift" data-n="1" aria-label="Dag later">${IC.right}</button></div></div>
+    <div class="field" id="f-nightsbox" ${it.cat==='stay'?'':'hidden'}><label>Aantal nachten</label><div class="stepper"><button type="button" class="iconbtn" data-a="nights" data-n="-1" aria-label="Minder nachten">−</button><b id="f-nights">${Math.max(1,+it.nights||1)}</b><button type="button" class="iconbtn" data-a="nights" data-n="1" aria-label="Meer nachten">+</button><span class="hint" id="f-nightshint" style="margin:0"></span></div></div>
+    <div class="two"><div class="field"><label for="f-time">Tijd</label><input class="in" type="time" id="f-time" value="${esc(it.time)}"></div>
+    <div class="field"><label for="f-ref">Boekingsnr.</label><input class="in" id="f-ref" value="${esc(it.ref)}" autocomplete="off"></div></div>
+    <div class="field"><label for="f-place">Adres of plaats</label><input class="in" id="f-place" value="${esc(it.place)}" autocomplete="off">${it.place?`<a href="https://maps.apple.com/?q=${encodeURIComponent(it.place)}" target="_blank" rel="noopener" style="font-size:.875rem">Open in Kaarten</a>`:''}</div>
+    <div class="field"><label for="f-link">Link (boeking, tickets)</label><input class="in" type="url" id="f-link" value="${esc(it.link)}" placeholder="https://" autocomplete="off">${/^https?:\/\//.test(it.link||'')?`<a href="${esc(it.link)}" target="_blank" rel="noopener" style="font-size:.875rem">Open link</a>`:''}</div>
+    <div class="field"><label for="f-note">Notitie</label><textarea class="in" id="f-note" placeholder="Kosten, wie heeft betaald, wat mee te nemen…">${esc(it.note)}</textarea></div>
+    ${id?`<div class="btnrow"><button type="button" class="btn sec" data-a="dup" data-id="${id}">Kopie maken</button><button type="button" class="btn danger" data-a="del" data-id="${id}">Verwijderen</button></div>`:''}`;
+  openSheet(id?'Bewerken':'Toevoegen', body, () => {
+    const cat = document.querySelector('#f-cat .on')?.dataset.v || 'act';
+    const data = {...it, title:val('f-title')||CATS[cat].label, cat, day:val('f-day'), time:val('f-time'), ref:val('f-ref'), place:val('f-place'), link:val('f-link'), note:val('f-note'),
+      done: document.querySelector('#f-done .on')?.dataset.v==='1', nights: cat==='stay' ? +$('#f-nights').textContent : 1, created: it.created || Date.now()};
+    const nid = id || newId();
+    save('items', nid, data);
+    if (data.day && data.day !== S.sel && tripDays().includes(data.day) && S.tab==='day') { S.sel = data.day; lsSet('rp-sel', S.sel); }
+    closeSheet(); render(); toast(id?'Opgeslagen':'Toegevoegd');
+  });
+  updateNightsHint();
+  if (!id) setTimeout(() => $('#f-title')?.focus(), 260);
+}
+function updateNightsHint(){
+  const h = $('#f-nightshint'); if (!h) return;
+  const d = val('f-day'), n = +($('#f-nights')?.textContent||1);
+  h.textContent = isDate(d) ? 'uitchecken '+short(addDays(d,n)) : '';
+}
+function editDay(d){
+  const info = S.days[d] || {};
+  openSheet(short(d), `<div class="field"><label for="f-dplace">Waar ben je?</label><input class="in" id="f-dplace" value="${esc(info.place)}" placeholder="Stad of regio" autocomplete="off"></div>
+    <div class="field"><label for="f-dnote">Notitie voor deze dag</label><textarea class="in" id="f-dnote" placeholder="Bijv. vroeg op, markt is alleen ’s ochtends">${esc(info.note)}</textarea></div>`, () => {
+    const place = val('f-dplace'), note = val('f-dnote');
+    if (!place && !note) { if (S.days[d]) remove('days', d); } else save('days', d, {place, note});
+    closeSheet();
+  });
+}
+function editPrep(id, group){
+  const p = id ? {...S.prep[id]} : {title:'', group, note:'', done:false};
+  const groups = [...new Set([...PREP_GROUPS, p.group].filter(Boolean))];
+  openSheet(id?'Checklist-item':'Nieuw item', `<div class="field"><label for="p-title">Wat</label><input class="in" id="p-title" value="${esc(p.title)}" autocomplete="off"></div>
+    <div class="field"><label for="p-group">Groep</label><select class="in" id="p-group">${groups.map(g=>`<option ${g===p.group?'selected':''}>${esc(g)}</option>`).join('')}</select></div>
+    <div class="field"><label for="p-note">Toelichting</label><textarea class="in" id="p-note">${esc(p.note)}</textarea></div>
+    ${id?`<button type="button" class="btn danger wide" data-a="delprep" data-id="${id}">Verwijderen</button>`:''}`, () => {
+    const title = val('p-title'); if (!title) { closeSheet(); return; }
+    save('prep', id || newId(), {...p, title, group:val('p-group'), note:val('p-note'), created:p.created||Date.now(), order:p.order ?? 999});
+    closeSheet();
+  });
+  if (!id) setTimeout(() => $('#p-title')?.focus(), 260);
+}
+function editMeta(){
+  const m = S.meta;
+  openSheet('Reisgegevens', `
+    <div class="field"><label for="m-name">Naam van de reis</label><input class="in" id="m-name" value="${esc(m.name)}"></div>
+    <div class="field"><label for="m-dest">Bestemming(en)</label><input class="in" id="m-dest" value="${esc(m.destination)}" placeholder="Bijv. Portugal"></div>
+    <div class="two"><div class="field"><label for="m-start">Eerste dag</label><input class="in" type="date" id="m-start" value="${esc(m.start)}"></div>
+    <div class="field"><label for="m-end">Laatste dag</label><input class="in" type="date" id="m-end" value="${esc(m.end)}"></div></div>
+    <p class="hint">Onderdelen blijven op hun datum staan. Wil je alles mee laten schuiven, gebruik dan “Planning verschuiven”.</p>
+    <div class="field"><label for="m-ins">Reisverzekering</label><input class="in" id="m-ins" value="${esc(m.insurer)}"></div>
+    <div class="two"><div class="field"><label for="m-insp">Alarmnummer</label><input class="in" type="tel" id="m-insp" value="${esc(m.insurerPhone)}"></div>
+    <div class="field"><label for="m-pol">Polisnummer</label><input class="in" id="m-pol" value="${esc(m.policy)}"></div></div>
+    <div class="field"><label for="m-extra">Overige notities</label><textarea class="in" id="m-extra" placeholder="Bijv. reisgenoten, adres huisoppas">${esc(m.extra)}</textarea></div>
+    <p class="hint">Zet hier geen paspoort- of pasnummers in.</p>`, () => {
+    const start = val('m-start'), end = val('m-end');
+    if (!isDate(start) || !isDate(end) || end < start) { toast('De laatste dag moet na de eerste dag liggen.'); return; }
+    save('trip','meta',{...m, name:val('m-name'), destination:val('m-dest'), start, end, insurer:val('m-ins'), insurerPhone:val('m-insp'), policy:val('m-pol'), extra:val('m-extra')});
+    closeSheet();
+  });
+}
+let shiftN = 1;
+function shiftSheet(){
+  shiftN = 1;
+  const planned = itemList().filter(i=>isDate(i.day)).length;
+  const draw = () => `<p>Vertrek je later of eerder? Verschuif alles in één keer: onderdelen, plaatsen per dag en de reisdatums.</p>
+    <div class="field"><label>Aantal dagen</label><div class="stepper"><button type="button" class="iconbtn" data-a="shiftn" data-n="-1" aria-label="Eerder">−</button><b>${shiftN>0?'+':''}${shiftN}</b><button type="button" class="iconbtn" data-a="shiftn" data-n="1" aria-label="Later">+</button></div></div>
+    <p class="hint">Nieuwe periode: ${short(addDays(S.meta.start,shiftN))} t/m ${short(addDays(S.meta.end,shiftN))}. Dit raakt ${planned} ${planned===1?'onderdeel':'onderdelen'}. Let op: geboekte tickets en hotels veranderen hier niet mee.</p>`;
+  openSheet('Planning verschuiven', `<div id="shiftbody">${draw()}</div>`, async () => {
+    if (!shiftN) { closeSheet(); return; }
+    const n = shiftN; closeSheet();
+    save('trip','meta',{...S.meta, start:addDays(S.meta.start,n), end:addDays(S.meta.end,n)});
+    for (const i of itemList().filter(i=>isDate(i.day))) save('items', i.id, {...i, day:addDays(i.day,n)});
+    const oldDays = Object.values(S.days);
+    for (const d of oldDays) remove('days', d.id);
+    for (const d of oldDays) save('days', addDays(d.id,n), {place:d.place||'', note:d.note||''});
+    if (S.sel) S.sel = addDays(S.sel,n);
+    toast(`Alles ${Math.abs(n)} ${Math.abs(n)===1?'dag':'dagen'} ${n>0?'later':'eerder'} gezet`);
+  }, 'Verschuif');
+  shiftSheet.redraw = () => { $('#shiftbody').innerHTML = draw(); };
+}
+
+/* ---------- toast ---------- */
+let toastT = 0;
+function toast(msg, btn, fn){
+  $('#toastmsg').textContent = msg;
+  const b = $('#toastbtn'); b.hidden = !btn; b.textContent = btn||''; b.onclick = () => { fn && fn(); $('#toast').classList.remove('show'); };
+  $('#toast').classList.add('show'); clearTimeout(toastT);
+  toastT = setTimeout(() => $('#toast').classList.remove('show'), btn ? 6000 : 2200);
+}
+
+/* ---------- events ---------- */
+let armed = null;
+document.addEventListener('click', e => {
+  const tab = e.target.closest('[data-tab]');
+  if (tab) { S.tab = tab.dataset.tab; lsSet('rp-tab', S.tab); render(); window.scrollTo(0,0); return; }
+  const el = e.target.closest('[data-a]'); if (!el) return;
+  const a = el.dataset.a, id = el.dataset.id;
+  switch (a){
+    case 'sel': if (el.dataset.d) { S.sel = el.dataset.d; lsSet('rp-sel', S.sel); render(); window.scrollTo(0,0); } break;
+    case 'goday': S.sel = el.dataset.d; S.tab = 'day'; lsSet('rp-sel', S.sel); lsSet('rp-tab','day'); render(); window.scrollTo(0,0); break;
+    case 'toggle': { const it = S.items[id]; if (it) { save('items', id, {...it, done:!it.done}); if (!it.done) toast('Geregeld'); } break; }
+    case 'toggleprep': { const p = S.prep[id]; if (p) save('prep', id, {...p, done:!p.done}); break; }
+    case 'edit': editItem(id); break;
+    case 'add': {
+      const cat = el.dataset.cat; const d = el.dataset.d;
+      editItem(null, {cat: cat || 'act', day: d});
+      break; }
+    case 'editday': editDay(el.dataset.d); break;
+    case 'addprep': editPrep(null, el.dataset.g); break;
+    case 'editprep': editPrep(id); break;
+    case 'editmeta': editMeta(); break;
+    case 'shift': shiftSheet(); break;
+    case 'shiftn': shiftN += +el.dataset.n; shiftSheet.redraw(); break;
+    case 'copycode': if (S.code) copyText(S.code, 'Overzetcode gekopieerd'); else toast('De code wordt nog gemaakt. Probeer het over een paar seconden opnieuw.'); break;
+    case 'backup': makeBackup(); break;
+    case 'sharelink': shareLink(); break;
+    case 'import': importSheet(''); break;
+    case 'close': closeSheet(); break;
+    case 'sheetsave': sheetSave && sheetSave(); break;
+    case 'dayshift': {
+      const s = $('#f-day'); const opts = [...s.options].map(o=>o.value).filter(isDate);
+      if (!isDate(s.value)) { s.value = S.sel || opts[0] || ''; }
+      else { const nd = addDays(s.value, +el.dataset.n); if (![...s.options].some(o=>o.value===nd)) s.insertAdjacentHTML('beforeend', `<option value="${nd}">${short(nd)} (buiten reis)</option>`); s.value = nd; }
+      updateNightsHint(); break; }
+    case 'nights': { const b = $('#f-nights'); b.textContent = Math.min(30, Math.max(1, +b.textContent + +el.dataset.n)); updateNightsHint(); break; }
+    case 'dup': { const it = S.items[id]; const nid = newId(); save('items', nid, {...it, title:it.title+' (kopie)', done:false, created:Date.now()}); closeSheet(); toast('Kopie gemaakt'); break; }
+    case 'del': case 'delprep': {
+      if (armed !== el) { armed = el; el.classList.add('armed'); el.textContent = 'Tik nogmaals om te verwijderen'; setTimeout(() => { if (armed===el){ armed=null; el.classList.remove('armed'); el.textContent='Verwijderen'; } }, 3000); break; }
+      armed = null; const col = a==='del' ? 'items' : 'prep'; const old = {...S[col][id]};
+      remove(col, id); closeSheet();
+      toast('Verwijderd', 'Ongedaan maken', () => save(col, id, old)); break; }
+  }
+  // segmented controls inside the sheet
+});
+document.addEventListener('click', e => {
+  const b = e.target.closest('.seg button'); if (!b) return;
+  b.parentElement.querySelectorAll('button').forEach(x => x.classList.toggle('on', x===b));
+  if (b.parentElement.id==='f-cat'){
+    const stay = b.dataset.v==='stay';
+    $('#f-nightsbox').hidden = !stay; $('#f-daylabel').textContent = stay ? 'Incheckdag' : 'Dag';
+  }
+});
+document.addEventListener('change', e => { if (e.target.id==='f-day') updateNightsHint(); });
+$('#scrim').addEventListener('click', closeSheet);
+document.addEventListener('keydown', e => { if (e.key==='Escape') closeSheet(); });
+
+render();
+connect();
+})();
+</script>
+
+<script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});</script>
+</body></html>
